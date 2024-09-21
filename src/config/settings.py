@@ -8,3 +8,6 @@ class Settings(BaseSettings):
     LEGISLATORS_CSV_FILE_PATH: str
     VOTES_FILE_PATH: str
     VOTE_RESULTS_CSV_FILE_PATH: str
+
+
+settings = Settings()
