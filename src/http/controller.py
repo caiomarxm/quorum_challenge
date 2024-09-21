@@ -5,6 +5,8 @@ from src.http.dto.legislator_summary import (
     LegislatorSummaryDetail,
     LegislatorBaseSummary,
 )
+from src.http.dto.bill_summary import BillSummary, BillSummaryDetail, BillBaseSummary
+
 from src.persistence.repository.repository import (
     get_bill,
     get_legislator,
@@ -54,6 +56,42 @@ def get_legislator_summary(
             supported=[
                 get_bill_for_vote_event(vote_result.vote_id).title
                 for vote_result in supported_bills
+            ],
+        ),
+    )
+
+
+@router.get("/bills/{bill_id}")
+def get_bill_summary(bill_id: int, include_details: bool = False):
+    bill = get_bill(bill_id=bill_id)
+    vote_results = get_vote_results_for_bill(bill_id=bill_id)
+
+    sponsor = get_legislator(legislator_id=bill.sponsor_id)
+
+    supporters = [vote_result for vote_result in vote_results if vote_result.voted_yes]
+    opposers = [
+        vote_result for vote_result in vote_results if not vote_result.voted_yes
+    ]
+
+    bill_summary = BillBaseSummary(
+        bill_id=bill.id,
+        bill_title=bill.title,
+        bill_opposers_count=len(opposers),
+        bill_supporters_count=len(supporters),
+        bill_primary_sponsor=sponsor.name,
+    )
+
+    if not include_details:
+        return bill_summary
+
+    return BillSummary(
+        **bill_summary.model_dump(),
+        detail=BillSummaryDetail(
+            opposers=[
+                get_legislator(opposer.legislator_id).name for opposer in opposers
+            ],
+            supporters=[
+                get_legislator(supporter.legislator_id).name for supporter in supporters
             ],
         ),
     )
