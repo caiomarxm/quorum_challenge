@@ -1,3 +1,5 @@
+from typing import List
+
 from src.config.settings import settings
 
 from src.persistence.entity.models import Bill, Legislator, Vote, VoteResult
@@ -23,7 +25,7 @@ vote_results = list(
 )
 
 
-def get_legislator(legislator_id: int):
+def get_legislator(legislator_id: int) -> Legislator:
     """
     Searches for a legislator with the provided legislator_id.
 
@@ -46,7 +48,7 @@ def get_legislator(legislator_id: int):
         raise IndexError(f"No legislator was found with id {legislator_id}")
 
 
-def get_vote_results_for_legislator(legislator_id: int):
+def get_vote_results_for_legislator(legislator_id: int) -> List[VoteResult]:
     """
     Retrieves all vote results for a given legislator.
 
@@ -63,7 +65,7 @@ def get_vote_results_for_legislator(legislator_id: int):
     ]
 
 
-def get_bill(bill_id: int):
+def get_bill(bill_id: int) -> Bill:
     """
     Searches for a bill with the provided bill_id.
 
@@ -86,7 +88,7 @@ def get_bill(bill_id: int):
         raise IndexError(f"No bill was found with id {bill_id}")
 
 
-def get_vote_results_for_bill(bill_id: int):
+def get_vote_results_for_bill(bill_id: int) -> List[VoteResult]:
     """
     Retrieves the vote results to a given bill.
 
@@ -107,3 +109,36 @@ def get_vote_results_for_bill(bill_id: int):
         for vote_result in vote_results
         if vote_result.vote_id == bill_vote_event.id
     ]
+
+
+def get_bill_for_vote_event(vote_event_id: int) -> Bill:
+    """
+    Retrieves the Bill associated with a specific vote event.
+
+    Args:
+        vote_event_id (int): The ID of the vote event to search for.
+
+    Returns:
+        Bill: The bill object that corresponds to the vote event.
+
+    Raises:
+        IndexError: If no vote event or bill is found for the provided vote_event_id.
+    """
+
+    def is_vote_with_provided_id(vote: Vote) -> bool:
+        return vote.id == vote_event_id
+
+    vote_event = next(filter(is_vote_with_provided_id, votes), None)
+
+    if vote_event is None:
+        raise IndexError(f"No vote event found with id {vote_event_id}")
+
+    def is_bill_with_id(bill: Bill) -> bool:
+        return bill.id == vote_event.bill_id
+
+    bill = next(filter(is_bill_with_id, bills), None)
+
+    if bill is None:
+        raise IndexError(f"No bill found for vote event id {vote_event_id}")
+
+    return bill
