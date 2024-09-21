@@ -2,6 +2,22 @@ from pydantic import BaseModel, computed_field
 from typing import Literal
 
 
+class Bill(BaseModel):
+    id: int
+    title: str
+    sponsor_id: int
+
+
+class Legislator(BaseModel):
+    id: int
+    name: str
+
+
+class Vote(BaseModel):
+    id: int
+    bill_id: int
+
+
 class VoteResult(BaseModel):
     id: int
     legislator_id: int
