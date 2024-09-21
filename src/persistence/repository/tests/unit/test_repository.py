@@ -5,6 +5,7 @@ from src.persistence.repository.repository import (
     get_vote_results_for_legislator,
     get_bill,
     get_vote_results_for_bill,
+    get_bill_for_vote_event,
 )
 
 mock_bills = [
@@ -85,3 +86,23 @@ def test_get_vote_results_for_bill(patch_data):
 def test_get_vote_results_for_nonexistent_bill(patch_data):
     with pytest.raises(StopIteration):
         get_vote_results_for_bill(999)
+
+
+def test_get_bill_for_vote_event_found(patch_data):
+    bill = get_bill_for_vote_event(1)
+    assert bill.id == 1
+    assert bill.title == "Bill 1"
+
+
+def test_get_bill_for_nonexistent_vote_event(patch_data):
+    with pytest.raises(IndexError, match="No vote event found with id 999"):
+        get_bill_for_vote_event(999)
+
+
+def test_get_bill_for_nonexistent_bill(patch_data):
+    mock_votes.append(Vote(id=3, bill_id=999))
+
+    with pytest.raises(IndexError, match="No bill found for vote event id 3"):
+        get_bill_for_vote_event(3)
+
+    mock_votes.pop()
