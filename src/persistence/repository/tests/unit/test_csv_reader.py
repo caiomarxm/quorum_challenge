@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 
-from src.persistence.csv_reader import parse_csv_to_model
+from src.persistence.repository.csv_reader import parse_csv_to_model
 
 
-SAMPLE_CSV_PATH = "src/persistence/tests/fixtures/sample.csv"
+SAMPLE_CSV_PATH = "src/persistence/repository/tests/fixtures/sample.csv"
 
 
 class ContentRow(BaseModel):
@@ -13,7 +13,7 @@ class ContentRow(BaseModel):
 
 
 def test_read_csv_with_model():
-    content = parse_csv_to_model(file_path=SAMPLE_CSV_PATH, target_entity=ContentRow)
+    content = parse_csv_to_model(file_path=SAMPLE_CSV_PATH, target_model=ContentRow)
     for item in content:
         assert isinstance(item, ContentRow)
 
