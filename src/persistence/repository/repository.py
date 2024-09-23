@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from src.config.settings import settings
@@ -25,7 +26,7 @@ vote_results = list(
 )
 
 
-def get_legislator(legislator_id: int) -> Legislator:
+def get_legislator(legislator_id: int) -> Legislator | None:
     """
     Searches for a legislator with the provided legislator_id.
 
@@ -45,7 +46,8 @@ def get_legislator(legislator_id: int) -> Legislator:
     try:
         return next(filter(find_legislator_with_id, legislators))
     except StopIteration:
-        raise IndexError(f"No legislator was found with id {legislator_id}")
+        logging.error(f"No legislator was found with id {legislator_id}")
+        return None
 
 
 def get_vote_results_for_legislator(legislator_id: int) -> List[VoteResult]:
