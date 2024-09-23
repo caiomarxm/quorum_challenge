@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quorum - Bills Summary</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', path='favicon.png') }}"
+    />
+
+    <style>
+      .table {
+        background-color: #f3e5f5; /* Light purple background */
+      }
+      .table th {
+        background-color: #212051; /* Medium purple for header */
+        color: #fff; /* Darker text color */
+      }
+      .table tbody tr:nth-child(even) {
+        background-color: #bdb2eb; /* Lighter purple for even rows */
+      }
+      .table tbody tr:nth-child(odd) {
+        background-color: #dbd5f0; /* Lighter purple for odd rows */
+      }
+      .table tbody tr:hover {
+        background-color: #9f8de7; /* Darker purple on hover */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="row mb-4 align-items-center">
+        <div class="col-md-4">
+          <img
+            src="{{ url_for('static', path='images/quorum_logo.jpg') }}"
+            alt="Logo"
+            class="img-fluid"
+          />
+        </div>
+        <div class="col-md-8 text-center">
+          <h1 class="display-4">Bills Summary</h1>
+        </div>
+      </div>
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Bill ID</th>
+            <th scope="col">Bill Title</th>
+            <th scope="col">Primary Sponsor</th>
+            <th scope="col">Supporters</th>
+            <th scope="col">Opposers</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for bill in bills %}
+          <tr data-id="{{ bill.bill_id }}" class="clickable-row">
+            <td>{{ bill.bill_id }}</td>
+            <td>{{ bill.bill_title }}</td>
+            <td>{{ bill.bill_primary_sponsor }}</td>
+            <td>{{ bill.bill_supporters_count }}</td>
+            <td>{{ bill.bill_opposers_count }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      class="modal fade"
+      id="billModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="billModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="billModalLabel">Bill Details</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <h6>Supporters:</h6>
+            <ul id="billSupporters"></ul>
+            <h6>Opposers:</h6>
+            <ul id="billOpposers"></ul>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        $(".clickable-row").on("click", function () {
+          const billId = $(this).data("id");
+
+          // Fetch additional data from the API
+          $.get(`api/bills/${billId}?include_details=true`, function (data) {
+            $("#billSupporters").empty();
+            $("#billOpposers").empty();
+
+            data.detail.supporters.forEach(function (supporter) {
+              $("#billSupporters").append(`<li>${supporter}</li>`);
+            });
+
+            data.detail.opposers.forEach(function (opposer) {
+              $("#billOpposers").append(`<li>${opposer}</li>`);
+            });
+
+            $("#billModal").modal("show");
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
